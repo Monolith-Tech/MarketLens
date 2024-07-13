@@ -64,7 +64,7 @@ index = VectorStoreIndex.from_documents(
 def get_response(query, index):
     query_engine = index.as_query_engine(service_context=service_context)
     response = query_engine.query(query)
-    return response
+    return response.response
 
 
 if __name__ == "__main__":
