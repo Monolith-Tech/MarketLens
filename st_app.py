@@ -1,52 +1,54 @@
 import streamlit as st
-import os
-from crewai import Crew, Process
-from agents import get_agents_and_tasks
+from utils.researcher import scrape_market_data, analyze_market_trends
+from utils.rag_pipelines import retrieve_and_generate
+from utils.reports import generate_report, save_report
+from utils.chatbot import get_chatbot_response
 
-# Define your function to generate the video
-def generate_video(topic, grow_api_key, stability_ai_api_key, openai_api_key):
-    os.environ['STABILITY_AI_API_KEY'] = stability_ai_api_key
-    os.environ['OPENAI_API_KEY'] = openai_api_key
-    
-    # Retrieve agents and tasks using your function
-    agents, tasks = get_agents_and_tasks(grow_api_key)
-    
-    # Initialize Crew object
-    crew = Crew(
-        agents=agents,
-        tasks=tasks,
-        process=Process.sequential,
-        memory=True,
-        verbose=2
-    )
-    
-    # Kick off the Crew with the specified topic
-    crew.kickoff(inputs={'topic': topic})
-    
-    # Return the path to the generated video
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), 'outputs/final_video/final_video.mp4')
+st.set_page_config(page_title="Market Analysis App", layout="wide")
 
-# Streamlit app setup
+
 def main():
-    st.title('ShortsIn')
-    st.subheader('Shorts generator')
-    
-    # Input fields
-    topic = st.text_input('Topic')
-    grow_api_key = st.text_input('Grow API Key')
-    stability_ai_api_key = st.text_input('Stability AI API Key')
-    openai_api_key = st.text_input('OpenAI API Key')
-    
-    # Generate video button
-    if st.button('Generate Video'):
-        if topic and grow_api_key and stability_ai_api_key and openai_api_key:
-            # Generate the video
-            video_path = generate_video(topic, grow_api_key, stability_ai_api_key, openai_api_key)
-            
-            # Display the generated video
-            st.video(video_path, format='video/mp4', start_time=0)
-        else:
-            st.warning('Please fill in all the input fields.')
+    st.sidebar.image('assets/logo.png', width=250)
+    st.sidebar.title("Market Analysis App")
 
-if __name__ == '__main__':
+    st.title("Market Analysis Dashboard")
+
+    menu = ["Market Research", "Trends Analysis",
+            "Report Generation", "Chatbot"]
+    choice = st.sidebar.selectbox("Menu", menu)
+
+    if choice == "Market Research":
+        st.subheader("Market Research")
+        url = st.text_input("Enter URL to scrape")
+        if st.button("Scrape Data"):
+            data = scrape_market_data(url)
+            st.write(data)
+
+    elif choice == "Trends Analysis":
+        st.subheader("Trends Analysis")
+        query = st.text_input("Enter your query")
+        documents = st.text_area("Enter documents (one per line)")
+        documents_list = documents.split("\n")
+        if st.button("Analyze Trends"):
+            trends = analyze_market_trends(documents_list)
+            st.write(trends)
+
+    elif choice == "Report Generation":
+        st.subheader("Generate Report")
+        data = st.text_area("Enter data")
+        trends = st.text_area("Enter trends")
+        if st.button("Generate Report"):
+            report = generate_report(data, trends)
+            save_report(report, "market_report.txt")
+            st.success("Report generated successfully!")
+
+    elif choice == "Chatbot":
+        st.subheader("Chat with our AI")
+        user_input = st.text_input("You: ")
+        if st.button("Send"):
+            response = get_chatbot_response(user_input)
+            st.write(f"Bot: {response}")
+
+
+if __name__ == "__main__":
     main()
