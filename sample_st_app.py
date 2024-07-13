@@ -1,6 +1,6 @@
 # import streamlit as st
 # from utils.researcher import scrape_market_data, analyze_market_trends
-# from utils.rag_pipelines import retrieve_and_generate
+# from utils.rag import retrieve_and_generate
 # from utils.reports import generate_report, save_report
 # from utils.chatbot import get_chatbot_response
 
