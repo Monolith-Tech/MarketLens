@@ -1,54 +1,72 @@
 import streamlit as st
-from utils.researcher import scrape_market_data, analyze_market_trends
-from utils.rag_pipelines import retrieve_and_generate
-from utils.reports import generate_report, save_report
-from utils.chatbot import get_chatbot_response
+import os
 
-st.set_page_config(page_title="Market Analysis App", layout="wide")
+# Function to save uploaded file to server
+def save_uploaded_file(uploaded_file):
+    save_path = os.path.join("data", uploaded_file.name)
+    with open(save_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    return save_path
 
+# Function to process user query
+def process_query(query):
+    from utils.rag import get_response, index
+    response = get_response(query=query, index=index)
+    return response
 
-def main():
-    st.sidebar.image('assets/logo.png', width=250)
-    st.sidebar.title("Market Analysis App")
+# Streamlit app layout
+st.set_page_config(page_title="RAG Application", page_icon="🔍", layout="wide")
+st.title("📄 RAG Based Application")
+st.markdown(
+    """
+    Welcome to the RAG-based application. This tool allows you to upload a file, 
+    input a query, and get a generated response based on the file contents.
+    """
+)
 
-    st.title("Market Analysis Dashboard")
+# File upload
+st.sidebar.header("Upload your file")
+uploaded_file = st.sidebar.file_uploader("Choose a file", type=["txt", "pdf", "docx", "csv"])
 
-    menu = ["Market Research", "Trends Analysis",
-            "Report Generation", "Chatbot"]
-    choice = st.sidebar.selectbox("Menu", menu)
+if uploaded_file is not None:
+    file_path = save_uploaded_file(uploaded_file)
+    st.sidebar.success(f"File uploaded and saved to {file_path}")
 
-    if choice == "Market Research":
-        st.subheader("Market Research")
-        url = st.text_input("Enter URL to scrape")
-        if st.button("Scrape Data"):
-            data = scrape_market_data(url)
-            st.write(data)
+# User query input
+st.header("Enter your query")
+query = st.text_area("Type your query here...", height=150)
 
-    elif choice == "Trends Analysis":
-        st.subheader("Trends Analysis")
-        query = st.text_input("Enter your query")
-        documents = st.text_area("Enter documents (one per line)")
-        documents_list = documents.split("\n")
-        if st.button("Analyze Trends"):
-            trends = analyze_market_trends(documents_list)
-            st.write(trends)
+if st.button("Submit Query"):
+    if uploaded_file is not None and query:
+        response = process_query(query)
+        st.markdown("### Response")
+        st.write(response)
+    else:
+        st.error("Please upload a file and enter a query to proceed.")
 
-    elif choice == "Report Generation":
-        st.subheader("Generate Report")
-        data = st.text_area("Enter data")
-        trends = st.text_area("Enter trends")
-        if st.button("Generate Report"):
-            report = generate_report(data, trends)
-            save_report(report, "market_report.txt")
-            st.success("Report generated successfully!")
-
-    elif choice == "Chatbot":
-        st.subheader("Chat with our AI")
-        user_input = st.text_input("You: ")
-        if st.button("Send"):
-            response = get_chatbot_response(user_input)
-            st.write(f"Bot: {response}")
-
-
-if __name__ == "__main__":
-    main()
+# Styling
+st.markdown(
+    """
+    <style>
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        font-size: 18px;
+        padding: 10px 24px;
+    }
+    .stTextArea>label {
+        font-size: 18px;
+    }
+    .stTextInput>label {
+        font-size: 18px;
+    }
+    .stMarkdown {
+        font-size: 18px;
+    }
+    .css-1d391kg {
+        font-size: 20px;
+        color: #4CAF50;
+    }
+    </style>
+    """, unsafe_allow_html=True
+)

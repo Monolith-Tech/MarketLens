@@ -61,6 +61,11 @@ index = VectorStoreIndex.from_documents(
 )
 
 # query engine
-query_engine = index.as_query_engine(service_context=service_context)
-response = query_engine.query("who is madhav?")
-print(response)
+def get_response(query, index):
+    query_engine = index.as_query_engine(service_context=service_context)
+    response = query_engine.query(query)
+    return response
+
+
+if __name__ == "__main__":
+    print(get_response("who is madhav?", index))
