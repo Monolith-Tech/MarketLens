@@ -5,7 +5,6 @@ from llama_index.core import PromptHelper
 from llama_index.core import ServiceContext
 from llama_index.llms.openai import OpenAI
 from llama_index.embeddings.openai import OpenAIEmbedding
-from llama_index.core.node_parser import SimpleNodeParser
 from llama_index.core.text_splitter import TokenTextSplitter, SentenceSplitter
 from llama_index.core import SimpleDirectoryReader
 
@@ -17,7 +16,7 @@ load_dotenv()
 # document loaders
 documents = SimpleDirectoryReader(input_dir='data').load_data()
 
-# Creating Text Chunks
+# sentence splitter
 text_splitter = TokenTextSplitter(
     separator=" ",
     chunk_size=1024,
@@ -26,12 +25,6 @@ text_splitter = TokenTextSplitter(
     tokenizer=tiktoken.encoding_for_model("gpt-3.5-turbo").encode
 )
 
-# node parser
-node_parser = SimpleNodeParser.from_defaults(
-    text_splitter=TokenTextSplitter
-)
-
-# # sentence splitter
 # text_splitter = SentenceSplitter(
 #     separator=" ",
 #     chunk_size=1024,
@@ -57,7 +50,7 @@ prompt_helper = PromptHelper(
 service_context = ServiceContext.from_defaults(
     llm=llm,
     embed_model=embed_model,
-    node_parser=node_parser,
+    text_splitter=text_splitter,
     prompt_helper=prompt_helper
 )
 

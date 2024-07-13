@@ -20,4 +20,4 @@
 *.env
 */secrets.toml
 
-/data
+
