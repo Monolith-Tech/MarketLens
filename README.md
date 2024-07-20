@@ -1,7 +1,5 @@
 # MarketLens: Real-Time Market Trend Analysis Tool
 
--   hack submission: https://lablab.ai/event/langflow-hackathon/monolith
-
 #### short desc
 ```
 MarketLens offers real-time insights into market trends by leveraging advanced web scraping and large language models (LLMs).
